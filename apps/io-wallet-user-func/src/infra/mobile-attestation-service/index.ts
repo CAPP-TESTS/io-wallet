@@ -73,18 +73,22 @@ const decodeBase64ToBuffer = (value: NonEmptyString): E.Either<Error, Buffer> =>
 export class MobileAttestationService implements AttestationService {
   #configuration: AttestationServiceConfiguration;
   #trustedSelfSignedBootKeys: () => ReadonlySet<string>;
+  #trustedSelfSignedBuilds: () => ReadonlySet<string>;
 
   /**
    * @param cnf - The attestation service configuration
    * @param trustedSelfSignedBootKeys - Getter of the allowed GrapheneOS verified boot keys
+   * @param trustedSelfSignedBuilds - Getter of the builds trusted through the Unified Attestation registry
    */
   constructor(
     cnf: AttestationServiceConfiguration,
     trustedSelfSignedBootKeys: () => ReadonlySet<string> = () =>
       new Set(GRAPHENEOS_ALLOWLIST_SNAPSHOT.verifiedBootKeys),
+    trustedSelfSignedBuilds: () => ReadonlySet<string> = () => new Set(),
   ) {
     this.#configuration = cnf;
     this.#trustedSelfSignedBootKeys = trustedSelfSignedBootKeys;
+    this.#trustedSelfSignedBuilds = trustedSelfSignedBuilds;
   }
 
   allowDevelopmentEnvironmentForUser = (user: FiscalCode) =>
@@ -280,6 +284,7 @@ export class MobileAttestationService implements AttestationService {
   #assertionValidationConfig = (): AssertionValidationConfig => ({
     ...this.#configuration,
     trustedSelfSignedBootKeys: this.#trustedSelfSignedBootKeys,
+    trustedSelfSignedBuilds: this.#trustedSelfSignedBuilds,
   });
 
   #keyAttestationConfig = (): AndroidKeyAttestationConfig => ({
@@ -288,6 +293,7 @@ export class MobileAttestationService implements AttestationService {
     httpRequestTimeout: this.#configuration.httpRequestTimeout,
     signatureDigests: this.#configuration.androidSigningCertificateDigests,
     trustedSelfSignedBootKeys: this.#trustedSelfSignedBootKeys(),
+    trustedSelfSignedBuilds: this.#trustedSelfSignedBuilds(),
   });
 }
 
@@ -307,6 +313,8 @@ export interface AndroidAttestationValidationConfig {
   httpRequestTimeout: number;
   /** Getter of the allowed GrapheneOS verified boot keys. */
   trustedSelfSignedBootKeys: () => ReadonlySet<string>;
+  /** Getter of the builds trusted through the Unified Attestation registry. */
+  trustedSelfSignedBuilds: () => ReadonlySet<string>;
 }
 
 export interface AssertionValidationConfig {
@@ -323,6 +331,8 @@ export interface AssertionValidationConfig {
   iOsTeamIdentifier: string;
   /** Getter of the allowed GrapheneOS verified boot keys. */
   trustedSelfSignedBootKeys: () => ReadonlySet<string>;
+  /** Getter of the builds trusted through the Unified Attestation registry. */
+  trustedSelfSignedBuilds: () => ReadonlySet<string>;
 }
 
 export const verifyAndroidAssertion: (input: {
@@ -373,6 +383,7 @@ export const verifyAndroidAssertion: (input: {
             httpRequestTimeout: config.httpRequestTimeout,
             signatureDigests: config.androidSigningCertificateDigests,
             trustedSelfSignedBootKeys: config.trustedSelfSignedBootKeys(),
+            trustedSelfSignedBuilds: config.trustedSelfSignedBuilds(),
           },
         }),
       ),
@@ -447,6 +458,7 @@ export const verifyAndroidAttestation: (
           nonce,
           signatureDigests: config.androidSigningCertificateDigests,
           trustedSelfSignedBootKeys: config.trustedSelfSignedBootKeys(),
+          trustedSelfSignedBuilds: config.trustedSelfSignedBuilds(),
           x509Chain,
         }),
       ),

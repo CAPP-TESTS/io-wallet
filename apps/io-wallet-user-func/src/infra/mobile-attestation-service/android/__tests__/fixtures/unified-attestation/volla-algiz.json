@@ -1,0 +1,87 @@
+{
+  "slug": "volla-algiz",
+  "manufacturer": "volla",
+  "brand": "volla",
+  "model": "Volla Phone Quintus",
+  "codename": "algiz",
+  "name": "algiz",
+  "enabled": true,
+  "createdAt": "2026-09-02T18:08:51.289Z",
+  "oemOrgName": "Volla OEM",
+  "certificate": {
+    "rsaLeafSerialHex": "FA92BD643BF3C8A5E269FA3BF28242F0",
+    "rsaIntermediateSerialHex": "F4E58B7BAEE8EE8BEBA1EF5FBBB84B01",
+    "ecdsaLeafSerialHex": "15DB415178662E14E525C46CC8E88C91",
+    "ecdsaIntermediateSerialHex": "B78A872A8612E473E32256B3EB55391F",
+    "authority": {
+      "name": "Google",
+      "rootCertificatesUrl": "https://android.googleapis.com/attestation/root"
+    }
+  },
+  "builds": [
+    {
+      "buildFingerprint": "volla/algiz/algiz:16/BP4A.251205.006/39-volla-16.0:userdebug/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "4b4195ca70d8e88c0b766439556b74f99eca41170402ea872d0111978478df1d",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-16T09:20:41.167Z"
+    },
+    {
+      "buildFingerprint": "volla/algiz/algiz:16/BP4A.251205.006/38-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "723d9c54a3f592daad65c965cbef66b323f5be79d251198a890fe639976cb203",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-15T15:02:54.554Z"
+    },
+    {
+      "buildFingerprint": "volla/algiz/algiz:16/BP4A.251205.006/37-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "25e444dfbdad20310114343863db5eb308c3bb6e6843c69dc0ce7622e6c05c6f",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-14T07:17:16.405Z"
+    },
+    {
+      "buildFingerprint": "volla/algiz/algiz:16/BP4A.251205.006/35-volla-16.0:userdebug/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "d1ffb38750903dd74c5fc47beaf05070db9ce84fb57a0cdb2d4f68a6c15df0bf",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-13T19:03:51.678Z"
+    },
+    {
+      "buildFingerprint": "volla/algiz/algiz:16/BP4A.251205.006/34-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "741f0a378f9b12a9e446e8f34118824ef79a4003c5c71db87cd6512bad1ac236",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-10T15:45:19.092Z"
+    },
+    {
+      "buildFingerprint": "volla/algiz/algiz:16/BP4A.251205.006/33-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "06c83a2f0d0ebc8d0e3682a95db499a57253d84a6ff02b0e7b374ed6890a90a4",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202609,
+      "createdAt": "2026-10-07T08:50:22.350Z"
+    },
+    {
+      "buildFingerprint": "volla/algiz/algiz:16/BP4A.251205.006/32-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "60e3b4bb5f47ffb090d25c9d5ac25fbe3da2e1f3e6dcdaa6f8fa2fb1576ca7d3",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202609,
+      "createdAt": "2026-10-06T12:10:10.784Z"
+    },
+    {
+      "buildFingerprint": "volla/algiz/algiz:16/BP4A.251205.006/30-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "987dca944bd1ef5d4b595c126c1d33a4b9f244063a0d251846a1b7127f187590",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202608,
+      "createdAt": "2026-09-02T18:08:51.304Z"
+    }
+  ]
+}

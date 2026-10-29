@@ -86,6 +86,7 @@ const assertionValidationConfig: AssertionValidationConfig = {
   iosBundleIdentifiers: [],
   iOsTeamIdentifier: "",
   trustedSelfSignedBootKeys: () => new Set(),
+  trustedSelfSignedBuilds: () => new Set(),
 };
 
 const createWalletInstanceRepository = (

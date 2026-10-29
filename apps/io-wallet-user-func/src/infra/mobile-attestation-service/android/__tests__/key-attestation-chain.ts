@@ -33,6 +33,8 @@ export interface TestAttestationParams {
   purposes: number[];
   securityLevel: number;
   signatureDigests: string[];
+  /** Hex encoded verified boot hash, 32 bytes of 0x07 by default. */
+  verifiedBootHash?: string;
   verifiedBootKey: string;
   verifiedBootState: number;
 }
@@ -86,7 +88,11 @@ const encodeKeyDescription = (params: TestAttestationParams) => {
         purpose: new IntegerSet(params.purposes),
         rootOfTrust: new RootOfTrust({
           deviceLocked: params.deviceLocked,
-          verifiedBootHash: octetString(Buffer.alloc(32, 7)),
+          verifiedBootHash: octetString(
+            params.verifiedBootHash
+              ? Buffer.from(params.verifiedBootHash, "hex")
+              : Buffer.alloc(32, 7),
+          ),
           verifiedBootKey: octetString(
             Buffer.from(params.verifiedBootKey, "hex"),
           ),

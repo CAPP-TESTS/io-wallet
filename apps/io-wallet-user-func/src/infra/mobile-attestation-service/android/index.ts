@@ -62,6 +62,7 @@ export const validateAndroidAttestation = ({
   requireSignatureDigests,
   signatureDigests,
   trustedSelfSignedBootKeys,
+  trustedSelfSignedBuilds,
   x509Chain,
 }: {
   androidCrlUrl: string;
@@ -73,6 +74,7 @@ export const validateAndroidAttestation = ({
   requireSignatureDigests?: boolean;
   signatureDigests?: string[];
   trustedSelfSignedBootKeys?: ReadonlySet<string>;
+  trustedSelfSignedBuilds?: ReadonlySet<string>;
   x509Chain: readonly X509Certificate[];
 }): TE.TaskEither<Error | ValidationError, ValidatedAttestation> =>
   pipe(
@@ -89,6 +91,7 @@ export const validateAndroidAttestation = ({
             requireSignatureDigests,
             signatureDigests,
             trustedSelfSignedBootKeys,
+            trustedSelfSignedBuilds,
             x509Chain,
           }),
         E.toError,
@@ -148,6 +151,7 @@ export interface AndroidKeyAttestationConfig {
   httpRequestTimeout: number;
   signatureDigests: string[];
   trustedSelfSignedBootKeys: ReadonlySet<string>;
+  trustedSelfSignedBuilds: ReadonlySet<string>;
 }
 
 const validatePlayIntegrityAssertion = ({
@@ -259,7 +263,8 @@ const validateKeyAttestationAssertion = (
  * verdicts that are not valid, it allows to tell the Play Integrity failures from the fallback recoveries:
  * - playIntegrity: why the fallback was used, i.e. the token was missing, its verdict was not valid or the
  *   Play Integrity service was not available;
- * - os: the OS running on the device, i.e. GrapheneOS or the stock OS.
+ * - os: the OS running on the device, i.e. GrapheneOS, another self-signed OS registered in the Unified
+ *   Attestation registry or the stock OS.
  * @param params - The assertion parameters
  * @param playIntegrityError - The error of the Play Integrity verification
  * @param deviceDetails - The device details of the accepted key attestation
@@ -273,9 +278,14 @@ const emitFallbackSucceeded = (
     name: "ANDROID_INTEGRITY_FALLBACK_SUCCEEDED",
     properties: {
       os:
-        deviceDetails.verifiedBootState === VERIFIED_BOOT_STATE_SELF_SIGNED
-          ? "grapheneos"
-          : "stock",
+        deviceDetails.verifiedBootState !== VERIFIED_BOOT_STATE_SELF_SIGNED
+          ? "stock"
+          : deviceDetails.verifiedBootKey !== undefined &&
+              params.keyAttestationConfig.trustedSelfSignedBootKeys.has(
+                deviceDetails.verifiedBootKey,
+              )
+            ? "grapheneos"
+            : "unified_attestation",
       playIntegrity: !params.integrityAssertion
         ? "missing"
         : playIntegrityError instanceof ExternalServiceError

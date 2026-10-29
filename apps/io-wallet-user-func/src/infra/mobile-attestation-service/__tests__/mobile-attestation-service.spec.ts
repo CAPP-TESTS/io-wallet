@@ -31,6 +31,7 @@ const configuration: AttestationServiceConfiguration = {
   httpRequestTimeout: 1000,
   iosBundleIdentifiers: [],
   iOsTeamIdentifier: "",
+  unifiedAttestationRegistry: { baseUrl: "", trustedOems: [] },
 };
 
 const trustedSelfSignedBootKeys = new Set(["9e6a8f3e"]);

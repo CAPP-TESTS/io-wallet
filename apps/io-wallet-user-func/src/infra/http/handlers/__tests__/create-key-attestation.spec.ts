@@ -77,6 +77,7 @@ const assertionValidationConfig: AssertionValidationConfig = {
   iosBundleIdentifiers: [],
   iOsTeamIdentifier: "",
   trustedSelfSignedBootKeys: () => new Set(),
+  trustedSelfSignedBuilds: () => new Set(),
 };
 
 const androidAttestationValidationConfig: AndroidAttestationValidationConfig = {
@@ -86,6 +87,7 @@ const androidAttestationValidationConfig: AndroidAttestationValidationConfig = {
   googlePublicKeys: [""],
   httpRequestTimeout: 1,
   trustedSelfSignedBootKeys: () => new Set(),
+  trustedSelfSignedBuilds: () => new Set(),
 };
 
 const keyAttestationKeyName = "key-attestation-key-name";

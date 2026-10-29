@@ -257,6 +257,7 @@ describe("Android assertion with key attestation fallback", () => {
         httpRequestTimeout: 1,
         signatureDigests: [SIGNATURE_DIGEST],
         trustedSelfSignedBootKeys,
+        trustedSelfSignedBuilds: new Set(),
       },
     };
     return params;
@@ -438,6 +439,7 @@ describe("Telemetry of the key attestation fallback", () => {
         httpRequestTimeout: 1,
         signatureDigests: [SIGNATURE_DIGEST],
         trustedSelfSignedBootKeys,
+        trustedSelfSignedBuilds: new Set(),
       },
     };
   };

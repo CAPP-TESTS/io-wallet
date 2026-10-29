@@ -14,6 +14,8 @@ import * as pkijs from "pkijs";
 
 import { CRL, validateIssuance, validateRevocation } from "@/certificates";
 
+import { toTrustedBuild } from "./unified-attestation-registry";
+
 /**
  * Key attestation extension data schema OID
  * https://developer.android.com/privacy-and-security/security-key-attestation#key_attestation_ext_schema
@@ -65,6 +67,11 @@ interface VerifyAttestationParams {
   signatureDigests?: string[];
   /** Hex encoded verified boot keys of the allowed self-signed OS (GrapheneOS). */
   trustedSelfSignedBootKeys?: ReadonlySet<string>;
+  /**
+   * Builds of a self-signed OS registered by trusted OEMs in the Unified Attestation registry,
+   * identified by verified boot key and hash (see toTrustedBuild in unified-attestation-registry).
+   */
+  trustedSelfSignedBuilds?: ReadonlySet<string>;
   x509Chain: readonly X509Certificate[];
 }
 
@@ -405,7 +412,9 @@ const extractExtension = (certificate: X509Certificate, oid: string) => {
  * 3) Failed
  *
  * Following the GrapheneOS attestation compatibility guide, a self-signed OS is accepted when its
- * verified boot key is one of the official GrapheneOS ones, while no patch level is enforced.
+ * verified boot key is one of the official GrapheneOS ones, or when its verified boot key and hash
+ * match a user build registered by a trusted OEM in the Unified Attestation registry, which pins the
+ * exact build. No patch level is enforced.
  * The app signing certificate is the only app integrity proof for a self-signed OS, as the
  * Play Integrity app recognition verdict is not available, thus it is required in that case.
  * https://grapheneos.org/articles/attestation-compatibility-guide
@@ -450,7 +459,18 @@ const checkAppSigningAndBootState = (
     const verifiedBootKey = Buffer.from(
       rootOfTrust.verifiedBootKey.buffer,
     ).toString("hex");
-    if (!attestationParams.trustedSelfSignedBootKeys?.has(verifiedBootKey)) {
+    const verifiedBootHash = rootOfTrust.verifiedBootHash
+      ? Buffer.from(rootOfTrust.verifiedBootHash.buffer).toString("hex")
+      : undefined;
+    if (
+      !attestationParams.trustedSelfSignedBootKeys?.has(verifiedBootKey) &&
+      !(
+        verifiedBootHash &&
+        attestationParams.trustedSelfSignedBuilds?.has(
+          toTrustedBuild(verifiedBootKey, verifiedBootHash),
+        )
+      )
+    ) {
       return `VerifiedBootKey of the self-signed OS is not allowed: ${verifiedBootKey}`;
     }
     return undefined;

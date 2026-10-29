@@ -1,0 +1,135 @@
+{
+  "slug": "volla-ansuz",
+  "manufacturer": "volla",
+  "brand": "volla",
+  "model": "Volla Phone Plinius",
+  "codename": "ansuz",
+  "name": "ansuz",
+  "enabled": true,
+  "createdAt": "2026-09-03T09:34:45.786Z",
+  "oemOrgName": "Volla OEM",
+  "certificate": {
+    "rsaLeafSerialHex": "E414A83727D1BB1466A1793DAE28158F",
+    "rsaIntermediateSerialHex": "C76D7DB22DEC9B8BAB815DEC5C349A67",
+    "ecdsaLeafSerialHex": "96815F8701403CF1EAF51F4D26C4A37D",
+    "ecdsaIntermediateSerialHex": "C9C9CAA3B6F974ED9AF597BAEF698913",
+    "authority": {
+      "name": "Google",
+      "rootCertificatesUrl": "https://android.googleapis.com/attestation/root"
+    }
+  },
+  "builds": [
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/124-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "6dc94643b36feacfbcea50db191a7699628057546c6db2310aaeeb8c60732836",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-14T08:13:09.773Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/123-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "c2d92073b3f3e882afbb9e607c0055aa1ea16329eca1087cc599a1b95cd1af9d",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-14T06:23:20.819Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/122-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "34ac24cf6c451a10b595f4c7cd8250aba4ccbc942d9aa4c9824b00549f4b7668",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-13T20:04:28.906Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/121-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "c4137642def65257ac00b366b3b2c79c3aba6ac5817c185623c975b1aba5f0c2",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-12T15:53:43.094Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/120-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "78371d7a804c0123feecc5e42ad7211dfbf5ecd13e050ecae51ada70b1fe9270",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202610,
+      "createdAt": "2026-10-12T08:46:19.543Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/119-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "7b35511e578d6d748a9f531ad9b9b626954f6266c4f70012c568fff7d10ac639",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202609,
+      "createdAt": "2026-10-08T20:23:42.740Z"
+    },
+    {
+      "buildFingerprint": "volla/lineage_ansuz/ansuz:17/CP2A.260605.016/10-volla-17.0:userdebug/release-keys",
+      "verifiedBootKeyHex": "7728e30f50bfa5cea165f473175a08803f6a8346642b5aa10913e9d9e6defef6",
+      "verifiedBootHashHex": "af3abba148178497a686e972f4ed8adab6573028cd1336bd3662f08741475114",
+      "osVersionRaw": 170000,
+      "minOsPatchLevelRaw": 202609,
+      "createdAt": "2026-09-30T11:57:02.286Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/118-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "c2f77b801f874aa125a141caa91bd7098eb13cadd87c6b3fed46220457b06d35",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202609,
+      "createdAt": "2026-09-28T10:01:58.282Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/117-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "952a0d4b2ce11a057b3da1ba63105da1e4b5e52efab0cb16557ed267370e9506",
+      "verifiedBootHashHex": "d5f20ca8113b7785dbba27532c72d7b94a5b6774b33d7fffe79402f97b1432c8",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202609,
+      "createdAt": "2026-09-25T23:54:17.420Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/112-volla-16.0:userdebug/release-keys",
+      "verifiedBootKeyHex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "verifiedBootHashHex": "4caa82095c8deb336132b2f84da0019a6f17bab0cd0c822172e924ce4a887768",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202608,
+      "createdAt": "2026-09-23T16:00:48.230Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/115-volla-16.0:user/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "0f102a0d067d9b09d50d9164da7a14c53cbf820bd06c61db36f23905d171aafc",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202609,
+      "createdAt": "2026-09-21T11:36:53.463Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/113-volla-16.0:userdebug/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "11e69faffc12ab1aeec1cf9b0d60fc38aff21dc761ff9022c195faccf2365003",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202609,
+      "createdAt": "2026-09-13T17:58:20.743Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/112-volla-16.0:userdebug/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "4caa82095c8deb336132b2f84da0019a6f17bab0cd0c822172e924ce4a887768",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202608,
+      "createdAt": "2026-09-03T12:54:42.050Z"
+    },
+    {
+      "buildFingerprint": "volla/ansuz/ansuz:16/BP4A.251205.006/111-volla-16.0:userdebug/release-keys",
+      "verifiedBootKeyHex": "22de3994532196f61c039e90260d78a93a4c57362c7e789be928036e80b77c8c",
+      "verifiedBootHashHex": "d97b5f0a1099137527326a49a8b9113f42be96bdd8f3239243c46a71051a2e6b",
+      "osVersionRaw": 160000,
+      "minOsPatchLevelRaw": 202608,
+      "createdAt": "2026-09-03T09:34:45.876Z"
+    }
+  ]
+}

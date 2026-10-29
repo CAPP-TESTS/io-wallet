@@ -87,6 +87,11 @@ export const AttestationServiceConfiguration = t.type({
   httpRequestTimeout: NumberFromString,
   iosBundleIdentifiers: t.array(t.string),
   iOsTeamIdentifier: t.string,
+  /** Unified Attestation registry, disabled when the base URL or the trusted OEMs are empty. */
+  unifiedAttestationRegistry: t.type({
+    baseUrl: t.string,
+    trustedOems: t.array(t.string),
+  }),
 });
 
 export type AttestationServiceConfiguration = t.TypeOf<
@@ -555,6 +560,27 @@ const getAttestationServiceConfigFromEnvironment: RE.ReaderEither<
       readFromEnvironment("IosTeamIdentifier"),
       RE.orElse(() => RE.right("DSEVY6MV9G")),
     ),
+    // Optional Unified Attestation registry (https://uattest.net) whose user builds registered by the
+    // trusted OEMs (organization names, comma separated) extend the GrapheneOS verified boot keys
+    unifiedAttestationRegistry: sequenceS(RE.Apply)({
+      baseUrl: pipe(
+        readFromEnvironment("UnifiedAttestationRegistryUrl"),
+        RE.orElse(() => RE.right("")),
+      ),
+      trustedOems: pipe(
+        readFromEnvironment("UnifiedAttestationTrustedOems"),
+        RE.map((oems) =>
+          oems
+            .split(",")
+            .map((oem) => oem.trim())
+            .filter((oem) => oem.length > 0),
+        ),
+        RE.orElse(
+          (): RE.ReaderEither<NodeJS.ProcessEnv, Error, string[]> =>
+            RE.right([]),
+        ),
+      ),
+    }),
   }),
 );
 
