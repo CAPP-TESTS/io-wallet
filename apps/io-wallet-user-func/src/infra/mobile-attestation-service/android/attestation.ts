@@ -68,7 +68,7 @@ interface VerifyAttestationParams {
   /** Hex encoded verified boot keys of the allowed self-signed OS (GrapheneOS). */
   trustedSelfSignedBootKeys?: ReadonlySet<string>;
   /**
-   * Builds of a self-signed OS registered by trusted OEMs in the Unified Attestation registry,
+   * Builds of a self-signed OS registered by trusted OEMs in the trusted Unified Attestation backends,
    * identified by verified boot key and hash (see toTrustedBuild in unified-attestation-registry).
    */
   trustedSelfSignedBuilds?: ReadonlySet<string>;
@@ -413,8 +413,8 @@ const extractExtension = (certificate: X509Certificate, oid: string) => {
  *
  * Following the GrapheneOS attestation compatibility guide, a self-signed OS is accepted when its
  * verified boot key is one of the official GrapheneOS ones, or when its verified boot key and hash
- * match a user build registered by a trusted OEM in the Unified Attestation registry, which pins the
- * exact build. No patch level is enforced.
+ * match a user build registered by a trusted OEM in a trusted Unified Attestation backend, which pins
+ * the exact build. No patch level is enforced.
  * The app signing certificate is the only app integrity proof for a self-signed OS, as the
  * Play Integrity app recognition verdict is not available, thus it is required in that case.
  * https://grapheneos.org/articles/attestation-compatibility-guide

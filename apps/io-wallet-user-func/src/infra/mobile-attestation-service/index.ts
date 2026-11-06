@@ -78,7 +78,7 @@ export class MobileAttestationService implements AttestationService {
   /**
    * @param cnf - The attestation service configuration
    * @param trustedSelfSignedBootKeys - Getter of the allowed GrapheneOS verified boot keys
-   * @param trustedSelfSignedBuilds - Getter of the builds trusted through the Unified Attestation registry
+   * @param trustedSelfSignedBuilds - Getter of the builds trusted through the Unified Attestation backends
    */
   constructor(
     cnf: AttestationServiceConfiguration,
@@ -313,7 +313,7 @@ export interface AndroidAttestationValidationConfig {
   httpRequestTimeout: number;
   /** Getter of the allowed GrapheneOS verified boot keys. */
   trustedSelfSignedBootKeys: () => ReadonlySet<string>;
-  /** Getter of the builds trusted through the Unified Attestation registry. */
+  /** Getter of the builds trusted through the Unified Attestation backends. */
   trustedSelfSignedBuilds: () => ReadonlySet<string>;
 }
 
@@ -331,7 +331,7 @@ export interface AssertionValidationConfig {
   iOsTeamIdentifier: string;
   /** Getter of the allowed GrapheneOS verified boot keys. */
   trustedSelfSignedBootKeys: () => ReadonlySet<string>;
-  /** Getter of the builds trusted through the Unified Attestation registry. */
+  /** Getter of the builds trusted through the Unified Attestation backends. */
   trustedSelfSignedBuilds: () => ReadonlySet<string>;
 }
 
