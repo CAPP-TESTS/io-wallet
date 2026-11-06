@@ -103,10 +103,87 @@ export const getTrustedBuilds = (
       )
     : [];
 
+const normalizeUrl = (url: string) => url.replace(/\/+$/, "");
+
+const HttpsUrl = t.refinement(t.string, (value) => {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+});
+
+const NonEmpty = t.refinement(t.string, (value) => value.trim().length > 0);
+
+/**
+ * A trusted Unified Attestation backend. Each OS vendor or device maker may run its own backend, possibly
+ * federated with the others, so the trust is granted per backend and per OEM: a backend is trusted only
+ * for the device families registered by the OEM organizations listed for it, even if it also serves
+ * (e.g. through the federation) the device families of other OEMs.
+ */
+export const UnifiedAttestationBackend = t.type({
+  /** Short name of the backend, used in the logs, e.g. "volla". */
+  name: NonEmpty,
+  /** Names of the OEM organizations trusted on this backend, e.g. "Volla OEM". */
+  trustedOems: t.refinement(
+    t.array(NonEmpty),
+    (oems) => oems.length > 0,
+    "NonEmptyArray",
+  ),
+  /** Base URL of the backend, HTTPS only, e.g. https://backend.example. */
+  url: HttpsUrl,
+});
+
+export type UnifiedAttestationBackend = t.TypeOf<
+  typeof UnifiedAttestationBackend
+>;
+
+/**
+ * Parses the trusted Unified Attestation backends, configured as a JSON array, e.g.
+ * `[{"name":"volla","url":"https://backend.example","trustedOems":["Volla OEM"]}]`.
+ * @param json - The JSON array of the backends, empty when no backend is trusted.
+ * @returns the backends, or an error if the JSON is not valid or a name or URL is repeated.
+ */
+export const parseUnifiedAttestationBackends = (
+  json: string,
+): E.Either<Error, UnifiedAttestationBackend[]> =>
+  pipe(
+    E.tryCatch(
+      () => JSON.parse(json) as unknown,
+      () => new Error("Invalid Unified Attestation backends: not a JSON value"),
+    ),
+    E.chain((value) =>
+      pipe(
+        t.array(UnifiedAttestationBackend).decode(value),
+        E.mapLeft(
+          (errors) =>
+            new Error(
+              `Invalid Unified Attestation backends: ${PathReporter.report(E.left(errors)).join(", ")}`,
+            ),
+        ),
+      ),
+    ),
+    E.filterOrElse(
+      (backends) =>
+        new Set(backends.map(({ name }) => name)).size === backends.length &&
+        new Set(backends.map(({ url }) => normalizeUrl(url))).size ===
+          backends.length,
+      () =>
+        new Error("Invalid Unified Attestation backends: repeated name or URL"),
+    ),
+  );
+
+export interface UnifiedAttestationRegistriesOptions {
+  fetchFn?: typeof fetch;
+  timeoutMs?: number;
+}
+
 export interface UnifiedAttestationRegistryOptions {
   /** Base URL of the Unified Attestation backend, e.g. https://backend.example. */
   baseUrl: string;
   fetchFn?: typeof fetch;
+  /** Name of the backend, used in the logs. */
+  name?: string;
   timeoutMs?: number;
   /** Names of the trusted OEM organizations, e.g. "Volla OEM". */
   trustedOems: readonly string[];
@@ -181,7 +258,7 @@ export class UnifiedAttestationRegistry {
     const refresh = () =>
       this.refresh().catch((e) =>
         console.warn(
-          `[Unified Attestation registry] refresh failed, keeping ${this.builds.size} trusted builds: ${e}`,
+          `[Unified Attestation registry${this.options.name ? ` ${this.options.name}` : ""}] refresh failed, keeping ${this.builds.size} trusted builds: ${e}`,
         ),
       );
     refresh();
@@ -190,11 +267,66 @@ export class UnifiedAttestationRegistry {
 
   private async get(path: string): Promise<unknown> {
     const fetchFn = this.options.fetchFn ?? fetch;
-    const url = `${this.options.baseUrl.replace(/\/+$/, "")}${path}`;
+    const url = `${normalizeUrl(this.options.baseUrl)}${path}`;
     const res = await fetchFn(url, {
       signal: AbortSignal.timeout(this.options.timeoutMs ?? 10000),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
     return res.json();
+  }
+}
+
+/**
+ * Builds trusted by several Unified Attestation backends, each with its own trusted OEMs: the union of
+ * the trusted builds of a {@link UnifiedAttestationRegistry} per backend. The backends are refreshed
+ * independently, so a failing backend keeps its last accepted builds without affecting the others.
+ */
+export class UnifiedAttestationRegistries {
+  readonly registries: readonly UnifiedAttestationRegistry[];
+  private union: { builds: ReadonlySet<string>; from: ReadonlySet<string>[] } =
+    { builds: new Set(), from: [] };
+
+  constructor(
+    backends: readonly UnifiedAttestationBackend[],
+    options: UnifiedAttestationRegistriesOptions = {},
+  ) {
+    this.registries = backends.map(
+      ({ name, trustedOems, url }) =>
+        new UnifiedAttestationRegistry({
+          ...options,
+          baseUrl: url,
+          name,
+          trustedOems,
+        }),
+    );
+  }
+
+  /**
+   * @returns the builds trusted by any backend, see {@link toTrustedBuild}.
+   */
+  getBuilds(): ReadonlySet<string> {
+    const sets = this.registries.map((registry) => registry.getBuilds());
+    // Each registry replaces its set on refresh, so the union is computed again only after a refresh
+    if (
+      sets.length !== this.union.from.length ||
+      sets.some((set, i) => set !== this.union.from[i])
+    ) {
+      this.union = {
+        builds: new Set(sets.flatMap((set) => [...set])),
+        from: sets,
+      };
+    }
+    return this.union.builds;
+  }
+
+  /**
+   * Refreshes all the backends now and then periodically, logging failures.
+   * @param intervalMs - The refresh interval of each backend.
+   * @returns the interval timers.
+   */
+  startAutoRefresh(intervalMs?: number) {
+    return this.registries.map((registry) =>
+      registry.startAutoRefresh(intervalMs),
+    );
   }
 }

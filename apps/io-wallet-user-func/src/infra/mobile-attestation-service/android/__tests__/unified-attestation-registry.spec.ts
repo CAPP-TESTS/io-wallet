@@ -1,10 +1,13 @@
+import * as E from "fp-ts/Either";
 import * as fs from "fs";
 import * as path from "path";
 import { describe, expect, it, vi } from "vitest";
 
 import {
   getTrustedBuilds,
+  parseUnifiedAttestationBackends,
   toTrustedBuild,
+  UnifiedAttestationRegistries,
   UnifiedAttestationRegistry,
 } from "../unified-attestation-registry";
 
@@ -50,8 +53,10 @@ const registryFetch = (
   return Object.assign(fetchFn as unknown as typeof fetch, { requested });
 };
 
-const page = (n: number) => `${BASE_URL}/api/v1/devices?page=${n}&pageSize=100`;
-const detail = (slug: string) => `${BASE_URL}/api/v1/devices/${slug}`;
+const page = (n: number, baseUrl = BASE_URL) =>
+  `${baseUrl}/api/v1/devices?page=${n}&pageSize=100`;
+const detail = (slug: string, baseUrl = BASE_URL) =>
+  `${baseUrl}/api/v1/devices/${slug}`;
 
 const userBuilds = (device: typeof algiz): string[] =>
   device.builds
@@ -186,5 +191,120 @@ describe("UnifiedAttestationRegistry", () => {
 
     await expect(registry.refresh()).rejects.toThrow("404");
     expect(registry.getBuilds().size).toBe(0);
+  });
+});
+
+describe("parseUnifiedAttestationBackends", () => {
+  const volla = {
+    name: "volla",
+    trustedOems: [VOLLA_OEM],
+    url: BASE_URL,
+  };
+  const murena = {
+    name: "murena",
+    trustedOems: ["Murena", "Fairphone"],
+    url: "https://other-registry.example",
+  };
+
+  it("should parse the trusted backends", () => {
+    expect(
+      parseUnifiedAttestationBackends(JSON.stringify([volla, murena])),
+    ).toEqual(E.right([volla, murena]));
+    expect(parseUnifiedAttestationBackends("[]")).toEqual(E.right([]));
+  });
+
+  it.each([
+    ["not JSON", "volla"],
+    ["not an array", JSON.stringify(volla)],
+    [
+      "an HTTP URL",
+      JSON.stringify([{ ...volla, url: "http://registry.example" }]),
+    ],
+    ["an invalid URL", JSON.stringify([{ ...volla, url: "registry.example" }])],
+    ["no trusted OEM", JSON.stringify([{ ...volla, trustedOems: [] }])],
+    ["an empty OEM name", JSON.stringify([{ ...volla, trustedOems: [" "] }])],
+    ["an empty name", JSON.stringify([{ ...volla, name: "" }])],
+    ["a repeated name", JSON.stringify([volla, { ...murena, name: "volla" }])],
+    [
+      "a repeated URL",
+      JSON.stringify([volla, { ...murena, url: `${BASE_URL}/` }]),
+    ],
+  ])("should reject %s", (_, json) => {
+    expect(E.isLeft(parseUnifiedAttestationBackends(json))).toBe(true);
+  });
+});
+
+describe("UnifiedAttestationRegistries", () => {
+  const OTHER_URL = "https://other-registry.example";
+  // A second backend, federated with the first one: it also lists the Volla device families, but it is
+  // trusted only for its own OEM
+  const routes = {
+    [detail("other-algiz", OTHER_URL)]: {
+      ...algiz,
+      oemOrgName: "Other OEM",
+      slug: "other-algiz",
+    },
+    [detail("volla-algiz")]: algiz,
+    [detail("volla-ansuz", OTHER_URL)]: ansuz,
+    [page(1)]: { items: [listItem("volla-algiz", VOLLA_OEM)], totalPages: 1 },
+    [page(1, OTHER_URL)]: {
+      items: [
+        listItem("other-algiz", "Other OEM"),
+        listItem("volla-ansuz", VOLLA_OEM),
+      ],
+      totalPages: 1,
+    },
+  };
+  const backends = [
+    { name: "volla", trustedOems: [VOLLA_OEM], url: BASE_URL },
+    { name: "other", trustedOems: ["Other OEM"], url: OTHER_URL },
+  ];
+
+  it("should trust the builds of each backend only for its trusted OEMs", async () => {
+    const fetchFn = registryFetch(routes);
+    const registries = new UnifiedAttestationRegistries(backends, { fetchFn });
+
+    await Promise.all(registries.registries.map((r) => r.refresh()));
+
+    // The algiz builds come from both backends, the ansuz ones are ignored: the second backend is not
+    // trusted for the Volla OEM
+    expect([...registries.getBuilds()].sort()).toEqual(
+      [...new Set(userBuilds(algiz))].sort(),
+    );
+    expect(fetchFn.requested).not.toContain(detail("volla-ansuz", OTHER_URL));
+  });
+
+  it("should keep the builds of the other backends when one fails", async () => {
+    let currentFetch = registryFetch(routes);
+    const registries = new UnifiedAttestationRegistries(
+      [
+        backends[0],
+        { name: "volla-ansuz", trustedOems: [VOLLA_OEM], url: OTHER_URL },
+      ],
+      { fetchFn: (input, init) => currentFetch(input, init) },
+    );
+    const [first, second] = registries.registries;
+    await Promise.all([first.refresh(), second.refresh()]);
+    const builds = registries.getBuilds();
+    expect(builds.size).toBe(15);
+    // The union is reused until a backend is refreshed
+    expect(registries.getBuilds()).toBe(builds);
+
+    currentFetch = registryFetch({});
+    await expect(second.refresh()).rejects.toThrow("404");
+    expect(registries.getBuilds()).toBe(builds);
+
+    currentFetch = registryFetch({
+      ...routes,
+      [page(1, OTHER_URL)]: { items: [], totalPages: 1 },
+    });
+    await second.refresh();
+    expect([...registries.getBuilds()].sort()).toEqual(
+      userBuilds(algiz).sort(),
+    );
+  });
+
+  it("should trust no build without backends", () => {
+    expect(new UnifiedAttestationRegistries([]).getBuilds().size).toBe(0);
   });
 });

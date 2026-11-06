@@ -56,7 +56,7 @@ import {
   MobileAttestationService,
 } from "@/infra/mobile-attestation-service";
 import { GrapheneOsAllowlist } from "@/infra/mobile-attestation-service/android/grapheneos-allowlist";
-import { UnifiedAttestationRegistry } from "@/infra/mobile-attestation-service/android/unified-attestation-registry";
+import { UnifiedAttestationRegistries } from "@/infra/mobile-attestation-service/android/unified-attestation-registry";
 import { PidIssuerClient } from "@/infra/pid-issuer/client";
 import { StatusListAllocatorService } from "@/infra/status-list-allocator";
 import { createStatusListBitRevocation } from "@/infra/status-list-bit-revocation";
@@ -140,19 +140,13 @@ const grapheneOsAllowlist = new GrapheneOsAllowlist({
 grapheneOsAllowlist.startAutoRefresh();
 const trustedSelfSignedBootKeys = () => grapheneOsAllowlist.getKeys();
 
-// Builds of other OS with a custom verified boot key (e.g. Volla OS), registered by trusted OEMs in a
-// Unified Attestation registry. Disabled unless both the registry URL and the trusted OEMs are configured
-const { unifiedAttestationRegistry: uaConfig } = config.attestationService;
-const unifiedAttestationRegistry =
-  uaConfig.baseUrl && uaConfig.trustedOems.length > 0
-    ? new UnifiedAttestationRegistry({
-        baseUrl: uaConfig.baseUrl,
-        trustedOems: uaConfig.trustedOems,
-      })
-    : undefined;
-unifiedAttestationRegistry?.startAutoRefresh();
-const trustedSelfSignedBuilds = (): ReadonlySet<string> =>
-  unifiedAttestationRegistry?.getBuilds() ?? new Set();
+// Builds of other OS with a custom verified boot key (e.g. Volla OS), registered by the trusted OEMs of
+// each trusted Unified Attestation backend. Disabled unless at least one backend is configured
+const unifiedAttestationRegistries = new UnifiedAttestationRegistries(
+  config.attestationService.unifiedAttestationBackends,
+);
+unifiedAttestationRegistries.startAutoRefresh();
+const trustedSelfSignedBuilds = () => unifiedAttestationRegistries.getBuilds();
 
 const mobileAttestationService = new MobileAttestationService(
   config.attestationService,

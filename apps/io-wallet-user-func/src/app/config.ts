@@ -22,6 +22,11 @@ import {
   SlackConfig,
 } from "io-wallet-common/infra/slack/config";
 
+import {
+  parseUnifiedAttestationBackends,
+  UnifiedAttestationBackend,
+} from "@/infra/mobile-attestation-service/android/unified-attestation-registry";
+
 export const APPLE_APP_ATTESTATION_ROOT_CA =
   "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNJVENDQWFlZ0F3SUJBZ0lRQy9PK0R2SE4wdUQ3akc1eUgySVhtREFLQmdncWhrak9QUVFEQXpCU01TWXdKQVlEVlFRRERCMUJjSEJzWlNCQmNIQWdRWFIwWlhOMFlYUnBiMjRnVW05dmRDQkRRVEVUTUJFR0ExVUVDZ3dLUVhCd2JHVWdTVzVqTGpFVE1CRUdBMVVFQ0F3S1EyRnNhV1p2Y201cFlUQWVGdzB5TURBek1UZ3hPRE15TlROYUZ3MDBOVEF6TVRVd01EQXdNREJhTUZJeEpqQWtCZ05WQkFNTUhVRndjR3hsSUVGd2NDQkJkSFJsYzNSaGRHbHZiaUJTYjI5MElFTkJNUk13RVFZRFZRUUtEQXBCY0hCc1pTQkpibU11TVJNd0VRWURWUVFJREFwRFlXeHBabTl5Ym1saE1IWXdFQVlIS29aSXpqMENBUVlGSzRFRUFDSURZZ0FFUlRIaG1MVzA3QVRhRlFJRVZ3VHRUNGR5Y3RkaE5iSmhGcy9JaTJGZENnQUhHYnBwaFkzK2Q4cWp1RG5nSU4zV1ZoUVVCSEFvTWVRL2NMaVAxc09VdGdqcUs5YXVZZW4xbU1FdlJxOVNrM0ptNVg4VTYySCt4VEQzRkU5VGdTNDFvMEl3UURBUEJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJTc2tSQlRNNzIrYUVIL3B3eXA1ZnJxNWVXS29UQU9CZ05WSFE4QkFmOEVCQU1DQVFZd0NnWUlLb1pJemowRUF3TURhQUF3WlFJd1FnRkduQnl2c2lWYnBUS3dTZ2Ewa1AwZThFZURTNCtzUW1UdmI3dm41M081K0ZSWGdlTGhwSjA2eXNDNVByT3lBakVBcDVVNHhEZ0VnbGxGN0VuM1ZjRTNpZXhaWnRLZVlucHF0aWpWb3lGcmFXVkl5ZC9kZ2FubXJkdUMxYm1UQkd3RAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t";
 
@@ -87,11 +92,8 @@ export const AttestationServiceConfiguration = t.type({
   httpRequestTimeout: NumberFromString,
   iosBundleIdentifiers: t.array(t.string),
   iOsTeamIdentifier: t.string,
-  /** Unified Attestation registry, disabled when the base URL or the trusted OEMs are empty. */
-  unifiedAttestationRegistry: t.type({
-    baseUrl: t.string,
-    trustedOems: t.array(t.string),
-  }),
+  /** Trusted Unified Attestation backends, none by default. */
+  unifiedAttestationBackends: t.array(UnifiedAttestationBackend),
 });
 
 export type AttestationServiceConfiguration = t.TypeOf<
@@ -560,27 +562,14 @@ const getAttestationServiceConfigFromEnvironment: RE.ReaderEither<
       readFromEnvironment("IosTeamIdentifier"),
       RE.orElse(() => RE.right("DSEVY6MV9G")),
     ),
-    // Optional Unified Attestation registry (https://uattest.net) whose user builds registered by the
-    // trusted OEMs (organization names, comma separated) extend the GrapheneOS verified boot keys
-    unifiedAttestationRegistry: sequenceS(RE.Apply)({
-      baseUrl: pipe(
-        readFromEnvironment("UnifiedAttestationRegistryUrl"),
-        RE.orElse(() => RE.right("")),
-      ),
-      trustedOems: pipe(
-        readFromEnvironment("UnifiedAttestationTrustedOems"),
-        RE.map((oems) =>
-          oems
-            .split(",")
-            .map((oem) => oem.trim())
-            .filter((oem) => oem.length > 0),
-        ),
-        RE.orElse(
-          (): RE.ReaderEither<NodeJS.ProcessEnv, Error, string[]> =>
-            RE.right([]),
-        ),
-      ),
-    }),
+    // Optional Unified Attestation backends (https://uattest.net), each run by an OS vendor or device maker:
+    // the user builds registered by their trusted OEMs extend the GrapheneOS verified boot keys.
+    // JSON array, e.g. [{"name":"volla","url":"https://backend.example","trustedOems":["Volla OEM"]}]
+    unifiedAttestationBackends: pipe(
+      readFromEnvironment("UnifiedAttestationBackends"),
+      RE.orElse(() => RE.right("[]")),
+      RE.chainEitherKW(parseUnifiedAttestationBackends),
+    ),
   }),
 );
 
